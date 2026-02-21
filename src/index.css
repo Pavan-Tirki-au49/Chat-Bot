@@ -1,0 +1,33 @@
+/**
+ * Base styles – resets, typography, layout
+ */
+
+@import './theme/theme.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background var(--transition-smooth), color var(--transition-smooth);
+}
+
+#root {
+  min-height: 100vh;
+  display: block;
+}
