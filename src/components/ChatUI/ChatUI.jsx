@@ -14,11 +14,38 @@ const FOLDERS = [
   { name: 'Creative chats', color: '#818cf8' },
 ]
 
-const FEATURE_CARDS = [
-  { icon: '📝', title: 'Saved Prompt Templates', prompt: 'Give me 5 professional email templates for status updates.' },
-  { icon: '📁', title: 'Media Type Selection', prompt: 'How can I organize my digital media files effectively?' },
-  { icon: '🌐', title: 'Multilingual Support', prompt: 'Translate "Welcome to our AI terminal" into French, Spanish, and Japanese.' },
-]
+const CATEGORY_DATA = {
+  All: [
+    { icon: '📝', title: 'Content Creation', prompt: 'Write a blog post about the future of AI in 2025.' },
+    { icon: '🖼️', title: 'Image Generation', prompt: 'Generate a futuristic city with flying cars in cyberpunk style.' },
+    { icon: '📊', title: 'Data Analysis', prompt: 'Analyze this sample data: [10, 20, 30, 40] and give me the trend.' },
+  ],
+  Text: [
+    { icon: '✍️', title: 'Creative Writing', prompt: 'Write a short sci-fi story about a robot discovering feelings.' },
+    { icon: '📧', title: 'Email Templates', prompt: 'Draft a professional follow-up email after a job interview.' },
+    { icon: '📚', title: 'Summarization', prompt: 'Summarize the concept of quantum entanglement for a 5-year-old.' },
+  ],
+  Image: [
+    { icon: '🎨', title: 'Artistic Styles', prompt: 'Describe a landscape in the style of Van Gogh.' },
+    { icon: '📸', title: 'Product Photography', prompt: 'Generate a high-end watch on a marble surface with soft lighting.' },
+    { icon: '🎭', title: 'Character Design', prompt: 'Design a fantasy warrior with dragon-scaled armor.' },
+  ],
+  Video: [
+    { icon: '🎬', title: 'Video Scripts', prompt: 'Write a 60-second script for a viral tech review video.' },
+    { icon: '🎞️', title: 'Animation Ideas', prompt: 'Describe a 3D animation sequence for a magical forest transition.' },
+    { icon: '📽️', title: 'Cinematic Prompts', prompt: 'Provide camera angles and lighting setups for a noir detective scene.' },
+  ],
+  Music: [
+    { icon: '🎵', title: 'Lyric Writing', prompt: 'Write catch lyrics for a synth-wave song about nostalgia.' },
+    { icon: '🎹', title: 'Melody Ideas', prompt: 'Describe a melancholic piano progression in C minor.' },
+    { icon: '🎧', title: 'Production Advice', prompt: 'How do I achieve a "lo-fi" aesthetic in my music production?' },
+  ],
+  Analytics: [
+    { icon: '📈', title: 'Market Trends', prompt: 'What are the current tech market trends for Q1 2026?' },
+    { icon: '🔍', title: 'SEO Optimization', prompt: 'Give me 5 SEO keywords for a vegan recipe blog.' },
+    { icon: '📐', title: 'Math Problem Solving', prompt: 'Explain and solve the Pythagorean theorem with examples.' },
+  ]
+}
 
 function ChatUI() {
   // Persistence
@@ -33,6 +60,24 @@ function ChatUI() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [selectedModel, setSelectedModel] = useState('meta-llama/Llama-3.2-1B-Instruct')
+
+  const MODELS = {
+    Text: ['meta-llama/Llama-3.2-1B-Instruct', 'mistralai/Mistral-7B-Instruct-v0.3', 'google/gemma-2-2b-it'],
+    Image: ['black-forest-labs/FLUX.1-schnell', 'stabilityai/stable-diffusion-3.5-large'],
+    Analytics: ['meta-llama/Llama-3.2-3B-Instruct', 'Qwen/Qwen2.5-Coder-7B-Instruct']
+  }
+
+  const currentModels = useMemo(() => {
+    if (selectedCategory === 'Image') return MODELS.Image
+    if (selectedCategory === 'Analytics') return MODELS.Analytics
+    return MODELS.Text
+  }, [selectedCategory])
+
+  // Update selected model when category changes
+  useEffect(() => {
+    setSelectedModel(currentModels[0])
+  }, [currentModels])
 
   const { theme, toggleTheme } = useTheme()
   const messagesEndRef = useRef(null)
@@ -55,6 +100,11 @@ function ChatUI() {
       .filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) => b.timestamp - a.timestamp)
   }, [chats, activeFolder, searchQuery])
+
+  // Filtered feature cards based on selected category
+  const filteredCards = useMemo(() => {
+    return CATEGORY_DATA[selectedCategory] || CATEGORY_DATA['All']
+  }, [selectedCategory])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -105,7 +155,7 @@ function ChatUI() {
         generatedResponses: activeChat ? activeChat.messages.filter(m => m.sender === 'ai').map(m => m.content) : []
       }
 
-      const { text: reply } = await sendChatMessage(text, null, undefined, history)
+      const { text: reply } = await sendChatMessage(text, null, selectedModel, history)
       const aiMsg = { id: createId(), sender: 'ai', content: reply, timestamp: Date.now() }
 
       setChats(prev => prev.map(c =>
@@ -234,6 +284,17 @@ function ChatUI() {
             </div>
           </div>
           <div className="header-actions">
+            <div className="model-selector-wrapper glass">
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="model-select"
+              >
+                {currentModels.map(m => (
+                  <option key={m} value={m}>{m.split('/').pop()}</option>
+                ))}
+              </select>
+            </div>
             <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
@@ -248,21 +309,7 @@ function ChatUI() {
               <div className="welcome-section">
                 <div className="welcome-logo">🟢</div>
                 <h2>How can i help you today?</h2>
-                <p className="welcome-desc">Currently in <strong>{activeFolder}</strong>. Choose a template below or start typing to begin.</p>
-              </div>
-
-              <div className="feature-grid">
-                {FEATURE_CARDS.map(card => (
-                  <div
-                    key={card.title}
-                    className="feature-card glass transition-smooth"
-                    onClick={() => handleSendMessage(card.prompt)}
-                  >
-                    <span className="card-icon">{card.icon}</span>
-                    <h3>{card.title}</h3>
-                    <p>Click to try: "{card.prompt.slice(0, 40)}..."</p>
-                  </div>
-                ))}
+                <p className="welcome-desc">Currently in <strong>{activeFolder}</strong>. Choose a category below to explore specialized templates.</p>
               </div>
 
               <div className="category-tabs">
@@ -274,6 +321,20 @@ function ChatUI() {
                   >
                     {cat}
                   </button>
+                ))}
+              </div>
+
+              <div className="feature-grid">
+                {filteredCards.map(card => (
+                  <div
+                    key={card.title}
+                    className="feature-card glass transition-smooth"
+                    onClick={() => handleSendMessage(card.prompt)}
+                  >
+                    <span className="card-icon">{card.icon}</span>
+                    <h3>{card.title}</h3>
+                    <p>Click to try: "{card.prompt.slice(0, 40)}..."</p>
+                  </div>
                 ))}
               </div>
             </div>

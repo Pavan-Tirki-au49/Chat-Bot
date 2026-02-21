@@ -13,6 +13,61 @@
   align-items: flex-start;
 }
 
+.chat-message__markdown {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.chat-message__markdown p {
+  margin: 0 0 12px 0;
+}
+
+.chat-message__markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message__markdown code {
+  background: rgba(163, 230, 53, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+.chat-message__markdown pre {
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chat-message__markdown pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.chat-message__markdown ul,
+.chat-message__markdown ol {
+  margin: 0 0 12px 20px;
+  padding: 0;
+}
+
+.chat-message__markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.chat-message__markdown th,
+.chat-message__markdown td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: left;
+}
+
+.chat-message__markdown th {
+  background: var(--bg-secondary);
+}
+
 .chat-message__bubble {
   max-width: 80%;
   padding: 14px 20px;

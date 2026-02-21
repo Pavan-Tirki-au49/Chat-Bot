@@ -1,8 +1,7 @@
-/**
- * ChatMessage – Renders a single message bubble
- * @param {{ message: { sender: 'user' | 'ai', content: string, isError?: boolean } }}
- */
-
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import './ChatMessage.css'
 
 export default function ChatMessage({ message }) {
@@ -14,7 +13,36 @@ export default function ChatMessage({ message }) {
   return (
     <div className={`chat-message chat-message--${variant} ${isError ? 'chat-message--error' : ''} transition-smooth`}>
       <div className="chat-message__bubble">
-        <span className="chat-message__content">{content}</span>
+        {isFromUser ? (
+          <span className="chat-message__content">{content}</span>
+        ) : (
+          <div className="chat-message__markdown">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || '')
+                  return !inline && match ? (
+                    <SyntaxHighlighter
+                      style={vscDarkPlus}
+                      language={match[1]}
+                      PreTag="div"
+                      {...props}
+                    >
+                      {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  )
+                }
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
       <div className="chat-message__info">
         <span>{isFromUser ? 'You' : 'AI'}</span>
