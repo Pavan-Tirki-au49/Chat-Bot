@@ -63,9 +63,9 @@ function ChatUI() {
   const [selectedModel, setSelectedModel] = useState('meta-llama/Llama-3.2-1B-Instruct')
 
   const MODELS = {
-    Text: ['meta-llama/Llama-3.2-1B-Instruct', 'mistralai/Mistral-7B-Instruct-v0.3', 'google/gemma-2-2b-it'],
-    Image: ['black-forest-labs/FLUX.1-schnell', 'stabilityai/stable-diffusion-3.5-large'],
-    Analytics: ['meta-llama/Llama-3.2-3B-Instruct', 'Qwen/Qwen2.5-Coder-7B-Instruct']
+    Text: ['meta-llama/Llama-3.2-1B-Instruct', 'mistralai/Mistral-7B-Instruct-v0.3', 'meta-llama/Meta-Llama-3-8B-Instruct'],
+    Image: ['Qwen/Qwen2.5-7B-Instruct', 'mistralai/Pixtral-12B-2409'], // Pixtral is a vision-capable chat model
+    Analytics: ['Qwen/Qwen2.5-Coder-7B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct']
   }
 
   const currentModels = useMemo(() => {
@@ -167,10 +167,7 @@ function ChatUI() {
       console.error('Chat API Error:', err)
       const friendlyMessage = toFriendlyErrorMessage(err)
       setError(friendlyMessage)
-      const errorMsg = { id: createId(), sender: 'ai', content: friendlyMessage, isError: true, timestamp: Date.now() }
-      setChats(prev => prev.map(c =>
-        c.id === currentId ? { ...c, messages: [...c.messages, errorMsg] } : c
-      ))
+      // Only set error bar, don't inject into messages for cleaner UI
     } finally {
       setIsLoading(false)
     }
@@ -340,6 +337,11 @@ function ChatUI() {
             </div>
           ) : (
             <div className="messages-list">
+              <div className="conversation-start-hint">
+                <span className="ai-icon">🟢</span>
+                <h4>Conversation Started</h4>
+                <p>Asking {selectedModel.split('/').pop()} in {activeFolder}</p>
+              </div>
               {activeChat.messages.map((msg) => (
                 <ChatMessage key={msg.id} message={msg} />
               ))}
