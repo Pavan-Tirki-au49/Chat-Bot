@@ -301,24 +301,26 @@ function ChatUI() {
         </header>
 
         <section className="chat-body">
+          <div className="category-row">
+            <div className="category-tabs">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  className={`tab-btn transition-smooth ${selectedCategory === cat ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {!activeChat ? (
             <div className="empty-state">
               <div className="welcome-section">
                 <div className="welcome-logo">🟢</div>
                 <h2>How can i help you today?</h2>
-                <p className="welcome-desc">Currently in <strong>{activeFolder}</strong>. Choose a category below to explore specialized templates.</p>
-              </div>
-
-              <div className="category-tabs">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    className={`tab-btn transition-smooth ${selectedCategory === cat ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                <p className="welcome-desc">Currently in <strong>{activeFolder}</strong>. Choose a template below or start typing to begin.</p>
               </div>
 
               <div className="feature-grid">
