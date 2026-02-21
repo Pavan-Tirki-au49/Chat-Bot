@@ -35,19 +35,20 @@ function MessageInput({ onSendMessage, disabled, placeholder }) {
       recognitionRef.current.lang = 'en-US'
 
       recognitionRef.current.onresult = (event) => {
-        let interimTranscript = ''
         let finalTranscript = ''
-
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript
-          } else {
-            interimTranscript += event.results[i][0].transcript
           }
         }
 
         if (finalTranscript) {
-          setText(prev => prev + (prev.length > 0 ? ' ' : '') + finalTranscript)
+          const cleanMatch = finalTranscript.trim()
+          setText(prev => {
+            // Simple check to avoid double-appending the same phrase
+            if (prev.toLowerCase().endsWith(cleanMatch.toLowerCase())) return prev
+            return prev + (prev.length > 0 ? ' ' : '') + cleanMatch
+          })
         }
       }
 
