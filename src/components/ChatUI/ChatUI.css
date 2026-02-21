@@ -10,11 +10,19 @@
 /* Sidebar Styling */
 .chat-sidebar {
   width: 300px;
+  height: 100vh;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   padding: 24px;
+  overflow: hidden;
+}
+
+.sidebar-header,
+.search-box,
+.new-chat-btn {
+  flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -51,7 +59,37 @@
 }
 
 .sidebar-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+}
+
+.sidebar-section.chats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Important for flex-child scrolling */
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.chat-list {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 8px;
+}
+
+/* Custom Scrollbar for Chat List */
+.chat-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
 }
 
 .section-header {
@@ -59,15 +97,15 @@
   justify-content: space-between;
   align-items: center;
   color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
-.folder-list,
-.chat-list {
+.folder-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -82,6 +120,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: all 0.2s ease;
 }
 
 .folder-item:hover,
@@ -98,10 +137,7 @@
 
 .chat-item {
   position: relative;
-  display: flex !important;
   justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s ease;
 }
 
 .chat-title {
@@ -147,6 +183,7 @@
 
 .new-chat-btn {
   margin-top: auto;
+  flex-shrink: 0;
   padding: 14px;
   background-color: var(--accent-primary);
   color: var(--bubble-user-text);
@@ -168,20 +205,25 @@
 /* Main Content Styling */
 .chat-main {
   flex: 1;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
   background-color: var(--bg-primary);
+  overflow: hidden;
 }
 
 .chat-header {
-  padding: 12px 24px;
+  padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 10;
   height: 64px;
+  flex-shrink: 0;
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  /* Solid background to prevent overlap */
 }
 
 .header-info {
