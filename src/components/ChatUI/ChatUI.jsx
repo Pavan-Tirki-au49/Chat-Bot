@@ -4,6 +4,7 @@ import { isApiKeyConfigured, sendChatMessage } from '../../services/api'
 import { useTheme } from '../../theme/ThemeContext'
 import ChatMessage from '../ChatMessage/ChatMessage'
 import MessageInput from '../MessageInput/MessageInput'
+import SettingsModal from '../SettingsModal/SettingsModal'
 import './ChatUI.css'
 
 const CATEGORIES = ['All', 'Text', 'Image', 'Video', 'Music', 'Analytics']
@@ -61,6 +62,8 @@ function ChatUI() {
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedModel, setSelectedModel] = useState('meta-llama/Llama-3.2-1B-Instruct')
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [userApiKey, setUserApiKey] = useState(() => localStorage.getItem('hf_api_key_override') || '')
 
   const MODELS = {
     Text: ['meta-llama/Llama-3.2-1B-Instruct', 'mistralai/Mistral-7B-Instruct-v0.3', 'meta-llama/Meta-Llama-3-8B-Instruct'],
@@ -155,7 +158,7 @@ function ChatUI() {
         generatedResponses: activeChat ? activeChat.messages.filter(m => m.sender === 'ai').map(m => m.content) : []
       }
 
-      const { text: reply } = await sendChatMessage(text, null, selectedModel, history)
+      const { text: reply } = await sendChatMessage(text, userApiKey, selectedModel, history)
       const aiMsg = { id: createId(), sender: 'ai', content: reply, timestamp: Date.now() }
 
       setChats(prev => prev.map(c =>
@@ -197,6 +200,20 @@ function ChatUI() {
     e.stopPropagation()
     setChats(prev => prev.filter(c => c.id !== id))
     if (activeChatId === id) setActiveChatId(null)
+  }
+
+  const handleClearHistory = () => {
+    if (window.confirm('Are you sure you want to delete all chats? This cannot be undone.')) {
+      setChats([])
+      setActiveChatId(null)
+      setIsSettingsOpen(false)
+    }
+  }
+
+  const handleUpdateApiKey = (key) => {
+    setUserApiKey(key)
+    localStorage.setItem('hf_api_key_override', key)
+    alert('API Key updated successfully!')
   }
 
   return (
@@ -296,7 +313,7 @@ function ChatUI() {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             <button className="icon-btn" title="Export Chat" onClick={exportChat}>📤</button>
-            <button className="icon-btn" title="Settings">⚙️</button>
+            <button className="icon-btn" title="Settings" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
           </div>
         </header>
 
@@ -378,6 +395,14 @@ function ChatUI() {
           <p className="footer-disclaimer">Llama 3.2 • Powered by Hugging Face • Version 1.0</p>
         </footer>
       </main>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        userApiKey={userApiKey}
+        onUpdateApiKey={handleUpdateApiKey}
+        onClearHistory={handleClearHistory}
+      />
     </div>
   )
 }
