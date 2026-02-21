@@ -64,6 +64,7 @@ function ChatUI() {
   const [selectedModel, setSelectedModel] = useState('meta-llama/Llama-3.2-1B-Instruct')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [userApiKey, setUserApiKey] = useState(() => localStorage.getItem('hf_api_key_override') || '')
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => localStorage.getItem('is_voice_enabled') === 'true')
 
   const MODELS = {
     Text: ['meta-llama/Llama-3.2-1B-Instruct', 'mistralai/Mistral-7B-Instruct-v0.3', 'meta-llama/Meta-Llama-3-8B-Instruct'],
@@ -166,6 +167,13 @@ function ChatUI() {
           ? { ...c, messages: [...c.messages, aiMsg] }
           : c
       ))
+
+      // Auto-speak if enabled
+      if (isVoiceEnabled) {
+        window.speechSynthesis.cancel()
+        const utterance = new SpeechSynthesisUtterance(reply)
+        window.speechSynthesis.speak(utterance)
+      }
     } catch (err) {
       console.error('Chat API Error:', err)
       const friendlyMessage = toFriendlyErrorMessage(err)
@@ -214,6 +222,12 @@ function ChatUI() {
     setUserApiKey(key)
     localStorage.setItem('hf_api_key_override', key)
     alert('API Key updated successfully!')
+  }
+
+  const handleToggleVoice = (enabled) => {
+    setIsVoiceEnabled(enabled)
+    localStorage.setItem('is_voice_enabled', enabled)
+    if (!enabled) window.speechSynthesis.cancel()
   }
 
   return (
@@ -402,6 +416,8 @@ function ChatUI() {
         userApiKey={userApiKey}
         onUpdateApiKey={handleUpdateApiKey}
         onClearHistory={handleClearHistory}
+        isVoiceEnabled={isVoiceEnabled}
+        onToggleVoice={handleToggleVoice}
       />
     </div>
   )

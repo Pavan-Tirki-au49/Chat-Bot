@@ -1,7 +1,15 @@
 import React, { useState } from 'react'
 import './SettingsModal.css'
 
-export default function SettingsModal({ isOpen, onClose, onClearHistory, userApiKey, onUpdateApiKey }) {
+export default function SettingsModal({
+    isOpen,
+    onClose,
+    onClearHistory,
+    userApiKey,
+    onUpdateApiKey,
+    isVoiceEnabled,
+    onToggleVoice
+}) {
     const [tempKey, setTempKey] = useState(userApiKey || '')
 
     if (!isOpen) return null
@@ -38,6 +46,21 @@ export default function SettingsModal({ isOpen, onClose, onClearHistory, userApi
 
                     <div className="setting-item">
                         <div className="setting-info">
+                            <h3>Voice Assistant</h3>
+                            <p>Automatically read out AI responses using your system's voice.</p>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={isVoiceEnabled}
+                                onChange={(e) => onToggleVoice(e.target.checked)}
+                            />
+                            <span className="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div className="setting-item">
+                        <div className="setting-info">
                             <h3>Clear All Chats</h3>
                             <p>Permanently delete all your conversation history from this device.</p>
                         </div>
@@ -48,14 +71,6 @@ export default function SettingsModal({ isOpen, onClose, onClearHistory, userApi
                         <div className="setting-info">
                             <h3>System Prompt</h3>
                             <p>Coming Soon: Set a custom personality for the AI.</p>
-                        </div>
-                        <div className="badge">SOON</div>
-                    </div>
-
-                    <div className="setting-item">
-                        <div className="setting-info">
-                            <h3>AI Temperature</h3>
-                            <p>Coming Soon: Control how creative or factual the AI is.</p>
                         </div>
                         <div className="badge">SOON</div>
                     </div>

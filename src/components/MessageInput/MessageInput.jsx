@@ -23,8 +23,63 @@ function MessageInput({ onSendMessage, disabled, placeholder }) {
     }
   }
 
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef(null)
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = true
+      recognitionRef.current.interimResults = true
+      recognitionRef.current.lang = 'en-US'
+
+      recognitionRef.current.onresult = (event) => {
+        let interimTranscript = ''
+        let finalTranscript = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
+          }
+        }
+
+        if (finalTranscript) {
+          setText(prev => prev + (prev.length > 0 ? ' ' : '') + finalTranscript)
+        }
+      }
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error)
+        setIsListening(false)
+      }
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false)
+      }
+    }
+  }, [])
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser.')
+      return
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    } else {
+      recognitionRef.current.start()
+      setIsListening(true)
+    }
+  }
+
   const handleSend = () => {
     if (text.trim() && !disabled) {
+      if (isListening) recognitionRef.current.stop()
       onSendMessage(text.trim())
       setText('')
       if (textareaRef.current) {
@@ -34,19 +89,27 @@ function MessageInput({ onSendMessage, disabled, placeholder }) {
   }
 
   return (
-    <div className={`message-input-bar ${disabled ? 'disabled' : ''}`}>
-      <button className="tool-btn">📎</button>
+    <div className={`message-input-bar ${disabled ? 'disabled' : ''} ${isListening ? 'listening' : ''}`}>
+      <button className="tool-btn" title="Add Attachment">📎</button>
       <textarea
         ref={textareaRef}
         value={text}
         onChange={handleInput}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={isListening ? "Listening..." : placeholder}
         disabled={disabled}
         rows={1}
       />
       <div className="input-actions">
         <span className="char-count">{text.length}</span>
+        <button
+          className={`voice-btn ${isListening ? 'active' : ''}`}
+          onClick={toggleListening}
+          title={isListening ? "Stop Listening" : "Voice Input"}
+          disabled={disabled}
+        >
+          {isListening ? '🛑' : '🎤'}
+        </button>
         <button
           className="send-btn transition-smooth"
           onClick={handleSend}

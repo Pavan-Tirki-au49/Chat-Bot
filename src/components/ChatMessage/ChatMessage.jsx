@@ -10,6 +10,16 @@ export default function ChatMessage({ message }) {
   const variant = isFromUser ? 'user' : 'ai'
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
+  const handleSpeak = () => {
+    // Cancel any ongoing speech first
+    window.speechSynthesis.cancel()
+
+    const utterance = new SpeechSynthesisUtterance(content)
+    // Filter out markdown characters for cleaner speech if needed, 
+    // but usually simple is best for now
+    window.speechSynthesis.speak(utterance)
+  }
+
   return (
     <div className={`chat-message chat-message--${variant} ${isError ? 'chat-message--error' : ''} transition-smooth`}>
       <div className="chat-message__bubble">
@@ -45,8 +55,17 @@ export default function ChatMessage({ message }) {
         )}
       </div>
       <div className="chat-message__info">
-        <span>{isFromUser ? 'You' : 'AI'}</span>
-        <span>{time}</span>
+        <div className="info-meta">
+          <span>{isFromUser ? 'You' : 'AI'}</span>
+          <span>{time}</span>
+        </div>
+        <button
+          className="speak-btn transition-smooth"
+          onClick={handleSpeak}
+          title="Listen to message"
+        >
+          🔊
+        </button>
       </div>
     </div>
   )
